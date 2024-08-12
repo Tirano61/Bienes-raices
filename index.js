@@ -2,17 +2,18 @@ import express from 'express';
 import csrf from "csurf";
 import cookieParser from 'cookie-parser';
 import usuarioRoutes from "./routes/usuarioRoutes.js";
+import propiedadesRoutes from "./routes/propiedadesRoutes.js";
 import db from "./config/db.js";
 // Crear la app
 const app = express();
 
 // habilitar lectura de datos de formularios
-app.use( express.urlencoded({ extended: true }) );
+app.use(express.urlencoded({ extended: true }));
 
 // Habilitar Cookie-parse
 app.use(cookieParser());
 // Habilitar CSRF
-app.use(csrf({cookie: true}));
+app.use(csrf({ cookie: true }));
 
 // Conexión a la base de datos
 try {
@@ -32,9 +33,11 @@ app.use(express.static('public'));
 
 // Routing
 app.use('/auth', usuarioRoutes);
+app.use('/', propiedadesRoutes);
+
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, ()=>{
+app.listen(port, () => {
   console.log(`Server corriendo en puerto ${port}`);
 });
