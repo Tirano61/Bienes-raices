@@ -25,3 +25,38 @@
 -Palabra clave para generar el JsonWebToken
 
     JWT_SECRET=
+## webpack
+Para compilar los js de los mapas.
+
+    npm i -D webpack-cli
+
+Se debe
+crear el archivo *webpack.config.js*
+```js
+import path from "path";
+
+export default {
+  mode: 'development',
+  entry: {
+    mapa: './src/js/mapa.js'
+  },
+  output: {
+    filename: '[name].js',
+    path: path.resolve('public/js'),
+  }
+}
+
+```
+
+
+## Agregando concurrently
+Para correr multiples scripts a la vez
+
+    npm i -D concurrently
+
+```json
+ "scripts": {
+    ...
+    "dev": "concurrently \"npm run css\" \"npm run js\""
+  },    
+```

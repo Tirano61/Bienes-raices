@@ -1,4 +1,13 @@
 {
   "editor.guides.bracketPairs": true,
-  "editor.guides.highlightActiveIndentation": "always"
+  "editor.guides.highlightActiveIndentation": "always",
+  "cSpell.words": [
+    "categoria",
+    "precio",
+    "Precios",
+    "propiedad",
+    "Seleccione",
+    "Título",
+    "venta"
+  ]
 }

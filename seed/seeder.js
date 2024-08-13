@@ -1,0 +1,52 @@
+
+import categorias from "./categorias.js";
+import precios from "./precios.js";
+import Categoria from "../models/Categoria.js";
+import Precio from "../models/Precio.js";
+import db from "../config/db.js";
+
+const importarDatos = async () => {
+    try {
+        //! Autenticarme en la base de datos
+        await db.authenticate();
+        
+        //! Generar las columnas
+        await db.sync();
+        
+        //! Insertar los datos
+        await Categoria.bulkCreate(categorias);
+        await Precio.bulkCreate(precios);
+
+        console.log('Datos insertados correctamente');
+        process.exit(0);
+
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
+}
+
+const eliminarDatos = async () => {
+    try {
+        await Promise.all([
+            Categoria.destroy({where:{}, truncate: true }),
+            Precio.destroy({where:{}, truncate: true })
+        ])
+        console.log('Datos eliminados correctamente');
+        process.exit(0);
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
+}
+
+if(process.argv[2] === "-i"){
+    importarDatos();
+}
+if(process.argv[2] === "-e"){
+    eliminarDatos();
+}
+
+
+
+
