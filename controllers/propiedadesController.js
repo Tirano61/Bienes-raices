@@ -77,9 +77,18 @@ const guardar = async (req, res) =>{
 
 }
 
+const agregarImagen = async (req,res) =>{
+
+  res.render('propiedades/agrgar-imagen', {
+    pagina: 'Agregar Imagen',
+    
+  })
+}
+
 
 export {
   admin,
   crear,
-  guardar
+  guardar,
+  agregarImagen
 }
