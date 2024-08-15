@@ -20,7 +20,8 @@ const crear = async (req,res) =>{
     barra: true,
     csrfToken: req.csrfToken(),
     categorias: categorias,
-    precios: precios
+    precios: precios,
+    datos: {}
   });
 }
 
@@ -38,8 +39,10 @@ const guardar = async (req, res) =>{
       pagina: 'Crear Propiedad',
       barra: true,
       categorias: categorias,
+      csrfToken: req.csrfToken(),
       precios: precios,
-      errores: result.array()
+      errores: result.array(),
+      datos: req.body
     });
   }
 
