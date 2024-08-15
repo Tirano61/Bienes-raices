@@ -2,14 +2,15 @@
 
 
 import express from 'express';
-import { admin, crear, guardar } from "../controllers/propiedadesController.js";
+import { admin, crear, guardar, agregarImagen } from "../controllers/propiedadesController.js";
 import { body } from "express-validator";
+import protegerRuta from "../middleware/protegerRuta.js";
 
 const router = express.Router();
 
-router.get('/mis-propiedades', admin);
-router.get('/propiedades/crear', crear);
-router.post('/propiedades/crear', 
+router.get('/mis-propiedades',protegerRuta ,admin);
+router.get('/propiedades/crear', protegerRuta, crear);
+router.post('/propiedades/crear',protegerRuta, 
     body('titulo').notEmpty().withMessage('El título es obligatorio'),    
     body('descripcion').notEmpty().withMessage('La descripción es obligatoria')
         .isLength({max: 200}).withMessage('La descripción es muy larga'), 
@@ -21,6 +22,8 @@ router.post('/propiedades/crear',
     body('lat').notEmpty().withMessage('Ubica la propiiedad en el mapa'),       
     guardar
 );
+
+router.get('/propiedades/agregar-imagen', agregarImagen);
 
 
 export default router;

@@ -1,7 +1,9 @@
 
 import categorias from "./categorias.js";
 import precios from "./precios.js";
-import { Categoria, Precio, Propiedad } from "../models/index.js";
+import usuarios from "./usuarios.js";
+import { Categoria, Precio, Propiedad, Usuario } from "../models/index.js";
+
 import db from "../config/db.js";
 
 const importarDatos = async () => {
@@ -15,6 +17,7 @@ const importarDatos = async () => {
         //! Insertar los datos
         await Categoria.bulkCreate(categorias);
         await Precio.bulkCreate(precios);
+        await Usuario.bulkCreate(usuarios);
 
         console.log('Datos insertados correctamente');
         process.exit(0);
@@ -30,6 +33,7 @@ const eliminarDatos = async () => {
         await db.query("SET FOREIGN_KEY_CHECKS = 0");
         await Categoria.drop({where:{}, truncate: true }),
         await Precio.destroy({where:{}, truncate: true }),
+        await Usuario.destroy({where: {}, truncate: true}),
         await db.query("SET FOREIGN_KEY_CHECKS = 1");
         await Propiedad.destroy({where: {}, truncate: true}),
  
