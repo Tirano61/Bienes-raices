@@ -60,3 +60,13 @@ Para correr multiples scripts a la vez
     "dev": "concurrently \"npm run css\" \"npm run js\""
   },    
 ```
+## Agregar Imagenes
+
+  ### Dropzone
+
+    npm i dropzone@5.9.3
+
+## Para subir Archivo
+
+  ### Multer
+    npm i multer
