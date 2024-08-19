@@ -1,30 +1,65 @@
 
-import { where } from "sequelize";
+import { unlink } from "node:fs/promises";
 import {Precio, Categoria, Propiedad} from "../models/index.js";
 import { validationResult } from "express-validator";
 
 const admin = async (req, res) => {
 
-  const { id } = req.usuario;
+  //! Leer el queryString
+  const { pagina: paginaActual } = req.query; 
+  const expresion = /^[0-9]$/; //! ^ indica que siempre debe iniciar con digitos - $ indica que siempre tiene que finalizar con digitos
+  if(!expresion.test(paginaActual)){
+    return res.redirect('/mis-propiedades?pagina=1');
+  }
 
-  const propiedades = await Propiedad.findAll({
-    where: {
-      usuarioId: id,
-    },
-    include:[
-      {
-        model: Categoria, as: 'categoria',
-      },
-      {
-        model: Precio, as: 'precio'
-      }
-    ]
-  })
+  try {
+    const { id } = req.usuario;
 
-  res.render('propiedades/admin', {
-    pagina: 'Mis propiedades',
-    propiedades,
-  });
+    //! Limites y offset para el paginador
+    const limit = 5;
+    const offset = ((paginaActual * limit) - limit);
+
+    const [ propiedades, total ] = await Promise.all([
+      Propiedad.findAll({
+        limit: limit,
+        offset: offset,
+        where: {
+          usuarioId: id,
+        },
+        include:[
+          {
+            model: Categoria, as: 'categoria',
+          },
+          {
+            model: Precio, as: 'precio'
+          }
+        ]
+      }),
+      Propiedad.count({
+        where:{
+          usuarioId: id,
+        }
+      }),
+    ])
+
+  
+    res.render('propiedades/admin', {
+      pagina: 'Mis propiedades',
+      propiedades,
+      csrfToken: req.csrfToken(),
+      paginas: Math.ceil(total / limit),
+      paginaActual: Number(paginaActual),
+      total,
+      offset,
+      limit
+
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+
+ 
 }
 //! Formulario para crear una nueva propiedad
 const crear = async (req,res) =>{
@@ -204,16 +239,19 @@ const guardarCambios = async (req, res) =>{
   //! Validar que la propiedad exista
   const propiedad = await Propiedad.findByPk(id);
   if(!propiedad){
+    console.log('Salio ! Validar que la propiedad exista');
     return res.redirect('/mis-propiedades');
   }
 
-  //! Validar que la propiedad no este publicada
-  if(propiedad.publicado){
+  //! Validar si la propiedad no este publicada
+  if(!propiedad.publicado){
+    console.log('! Validar que la propiedad no este publicada');
     return res.redirect('/mis-propiedades');
   }
 
   //! Validar que la propiedad pertenece a quien visita esta página
   if(propiedad.usuarioId !== req.usuario.id){
+    console.log('! Validar que la propiedad pertenece a quien visita esta página');
     return res.redirect('/mis-propiedades');
   }
 
@@ -245,6 +283,65 @@ const guardarCambios = async (req, res) =>{
   }
 }
 
+const eliminar = async (req,res)=>{
+
+  const { id } = req.params;
+  //! Validar que la propiedad exista
+  const propiedad = await Propiedad.findByPk(id);
+  if(!propiedad){
+    console.log('Salio ! Validar que la propiedad exista');
+    return res.redirect('/mis-propiedades');
+  }
+
+  //! Validar si la propiedad no este publicada
+  if(!propiedad.publicado){
+    console.log('! Validar que la propiedad no este publicada');
+    return res.redirect('/mis-propiedades');
+  }
+
+  //! Validar que la propiedad pertenece a quien visita esta página
+  if(propiedad.usuarioId !== req.usuario.id){
+    console.log('! Validar que la propiedad pertenece a quien visita esta página');
+    return res.redirect('/mis-propiedades');
+  }
+
+  //! Eliminar la imagen asosiada
+  if(propiedad.imagen){
+    await unlink(`public/uploads/${propiedad.imagen}`);
+    console.log(`Se elimino la imagen ${propiedad.imagen}`);
+  }
+
+  //! Eliminar la propiedad
+  await propiedad.destroy();
+  res.redirect('/mis-propiedades');
+
+}
+
+//! Area publica
+const mostrarPropiedad = async (req,res) =>{
+
+  const { id } = req.params;
+
+  //! comprobar que la propiedad exista
+  const propiedad = await Propiedad.findByPk(id,{
+    include:[
+      {
+        model: Categoria, as: 'categoria',
+      },
+      {
+        model: Precio, as: 'precio'
+      }
+    ]
+  })
+  if(!propiedad){
+    res.redirect('/404');
+  }
+  res.render('propiedades/mostrar',{
+    propiedad,
+    pagina: propiedad.titulo,
+  });
+}
+
 export {
   admin,
   crear,
@@ -252,5 +349,7 @@ export {
   agregarImagen,
   alamcenarImagen,
   editar,
-  guardarCambios
+  guardarCambios,
+  eliminar,
+  mostrarPropiedad
 }

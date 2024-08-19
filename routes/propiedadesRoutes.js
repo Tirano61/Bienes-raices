@@ -2,7 +2,7 @@
 
 
 import express from 'express';
-import { admin, crear, guardar, agregarImagen, alamcenarImagen, editar, guardarCambios } from "../controllers/propiedadesController.js";
+import { admin, crear, guardar, agregarImagen, alamcenarImagen, editar, guardarCambios, eliminar, mostrarPropiedad } from "../controllers/propiedadesController.js";
 import { body } from "express-validator";
 import protegerRuta from "../middleware/protegerRuta.js";
 import upload from "../middleware/subirImagen.js";
@@ -41,5 +41,10 @@ router.post('/propiedades/editar/:id',protegerRuta,
     body('lat').notEmpty().withMessage('Ubica la propiiedad en el mapa'),       
     guardarCambios
 );
+
+router.post('/propiedades/eliminar/:id', protegerRuta, eliminar);
+
+// Area publica todos los usuarios pueden entrar sin autenticarse
+router.get('/propiedades/:id', mostrarPropiedad);
 
 export default router;
