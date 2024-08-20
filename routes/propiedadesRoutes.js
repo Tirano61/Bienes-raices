@@ -44,7 +44,7 @@ router.post('/propiedades/editar/:id',protegerRuta,
 
 router.post('/propiedades/eliminar/:id', protegerRuta, eliminar);
 
-// Area publica todos los usuarios pueden entrar sin autenticarse
+//! Area publica todos los usuarios pueden entrar sin autenticarse
 router.get('/propiedades/:id', mostrarPropiedad);
 
 export default router;
