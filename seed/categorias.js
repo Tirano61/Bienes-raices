@@ -2,10 +2,10 @@
 
 const categorias = [
     { 
-        nombre: 'Casa'
+        nombre: 'Casas'
     },
     { 
-        nombre: 'Departamento'
+        nombre: 'Departamentos'
     },
     { 
         nombre: 'Bodegas'

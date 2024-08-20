@@ -333,8 +333,9 @@ const mostrarPropiedad = async (req,res) =>{
       }
     ]
   })
+ 
   if(!propiedad){
-    res.redirect('/404');
+    return res.redirect('/404');
   }
   res.render('propiedades/mostrar',{
     propiedad,
