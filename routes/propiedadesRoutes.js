@@ -6,6 +6,7 @@ import { admin, crear, guardar, agregarImagen, alamcenarImagen, editar, guardarC
 import { body } from "express-validator";
 import protegerRuta from "../middleware/protegerRuta.js";
 import upload from "../middleware/subirImagen.js";
+import identificarUsuario from "../middleware/identificarUsuario.js";
 
 const router = express.Router();
 
@@ -45,6 +46,6 @@ router.post('/propiedades/editar/:id',protegerRuta,
 router.post('/propiedades/eliminar/:id', protegerRuta, eliminar);
 
 //! Area publica todos los usuarios pueden entrar sin autenticarse
-router.get('/propiedades/:id', mostrarPropiedad);
+router.get('/propiedades/:id', identificarUsuario, mostrarPropiedad);
 
 export default router;

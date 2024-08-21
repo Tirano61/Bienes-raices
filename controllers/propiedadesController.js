@@ -322,6 +322,7 @@ const mostrarPropiedad = async (req,res) =>{
 
   const { id } = req.params;
 
+
   //! comprobar que la propiedad exista
   const propiedad = await Propiedad.findByPk(id,{
     include:[
@@ -340,6 +341,8 @@ const mostrarPropiedad = async (req,res) =>{
   res.render('propiedades/mostrar',{
     propiedad,
     pagina: propiedad.titulo,
+    csrfToken: req.csrfToken(),
+    usuario: req.usuario
   });
 }
 
