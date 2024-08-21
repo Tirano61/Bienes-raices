@@ -1,7 +1,10 @@
 
 import { unlink } from "node:fs/promises";
-import {Precio, Categoria, Propiedad} from "../models/index.js";
+import {Precio, Categoria, Propiedad, Mensaje } from "../models/index.js";
 import { validationResult } from "express-validator";
+import { esVendedor } from "../helpers/index.js";
+
+
 
 const admin = async (req, res) => {
 
@@ -16,7 +19,7 @@ const admin = async (req, res) => {
     const { id } = req.usuario;
 
     //! Limites y offset para el paginador
-    const limit = 5;
+    const limit = 10;
     const offset = ((paginaActual * limit) - limit);
 
     const [ propiedades, total ] = await Promise.all([
@@ -32,6 +35,9 @@ const admin = async (req, res) => {
           },
           {
             model: Precio, as: 'precio'
+          },
+          {
+            model: Mensaje, as: 'mensajes'
           }
         ]
       }),
@@ -322,6 +328,37 @@ const mostrarPropiedad = async (req,res) =>{
 
   const { id } = req.params;
 
+  //! comprobar que la propiedad exista
+  const propiedad = await Propiedad.findByPk(id,{
+    include:[
+      {
+        model: Categoria, as: 'categoria',
+      },
+      {
+        model: Precio, as: 'precio'
+      }
+    ]
+  })
+ 
+  if(!propiedad){
+    return res.redirect('/404');
+  }
+
+  const esvendedor = esVendedor( req.usuario?.id, propiedad.usuarioId );
+
+  console.log(esvendedor);
+
+  res.render('propiedades/mostrar',{
+    propiedad,
+    pagina: propiedad.titulo,
+    csrfToken: req.csrfToken(),
+    usuario: req.usuario,
+    esvendedor
+  });
+}
+
+const enviarMensaje = async(req, res) =>{
+  const { id } = req.params;
 
   //! comprobar que la propiedad exista
   const propiedad = await Propiedad.findByPk(id,{
@@ -338,13 +375,46 @@ const mostrarPropiedad = async (req,res) =>{
   if(!propiedad){
     return res.redirect('/404');
   }
+  //! Renderizar los errores
+  let result = validationResult(req);
+  
+  if(!result.isEmpty()){
+    return res.render('propiedades/mostrar',{
+      propiedad,
+      pagina: propiedad.titulo,
+      csrfToken: req.csrfToken(),
+      usuario: req.usuario,
+      esvendedor: esVendedor( req.usuario?.id, propiedad.usuarioId ),
+      errores: result.array()
+    });
+  }
+  const { mensaje } = req.body;
+  const { id: propiedadId } = req.params;
+  const { id: usuarioId } = req.usuario;
+
+  console.log(req.params);
+  //! Almacenar mensaje
+  await Mensaje.create({
+    mensaje,
+    propiedadId,
+    usuarioId
+  });
+
   res.render('propiedades/mostrar',{
     propiedad,
     pagina: propiedad.titulo,
     csrfToken: req.csrfToken(),
-    usuario: req.usuario
+    usuario: req.usuario,
+    esvendedor:esVendedor( req.usuario?.id, propiedad.usuarioId ),
+    enviado: true
   });
 }
+//! Leer mensajes recibidos
+
+const verMensajes = (req, res) =>{
+  res.send('Mensajes aqui')
+}
+
 
 export {
   admin,
@@ -355,5 +425,7 @@ export {
   editar,
   guardarCambios,
   eliminar,
-  mostrarPropiedad
+  mostrarPropiedad,
+  enviarMensaje,
+  verMensajes
 }

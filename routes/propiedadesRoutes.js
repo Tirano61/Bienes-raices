@@ -2,7 +2,7 @@
 
 
 import express from 'express';
-import { admin, crear, guardar, agregarImagen, alamcenarImagen, editar, guardarCambios, eliminar, mostrarPropiedad } from "../controllers/propiedadesController.js";
+import { admin, crear, guardar, agregarImagen, alamcenarImagen, editar, guardarCambios, eliminar, mostrarPropiedad, enviarMensaje, verMensajes } from "../controllers/propiedadesController.js";
 import { body } from "express-validator";
 import protegerRuta from "../middleware/protegerRuta.js";
 import upload from "../middleware/subirImagen.js";
@@ -47,5 +47,15 @@ router.post('/propiedades/eliminar/:id', protegerRuta, eliminar);
 
 //! Area publica todos los usuarios pueden entrar sin autenticarse
 router.get('/propiedades/:id', identificarUsuario, mostrarPropiedad);
+
+//! Almacenar los mensajes
+router.post('/propiedades/:id', 
+    identificarUsuario, body('mensaje').isLength({min:10}).withMessage('El mensaje no puede ir vacio o es muy corto.'), 
+    enviarMensaje
+);
+
+router.get('/mensajes/:id', protegerRuta, verMensajes);
+
+
 
 export default router;

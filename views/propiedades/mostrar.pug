@@ -48,12 +48,29 @@ block contenido
                     p(class="text-gray-600 font-bold text-xs") Dirección    
                         span(id="calle" class="text-gray-800 block text-lg")= propiedad.calle
 
-                if !usuario
-                    div(class="flex flex-col items-center justify-center gap-2 pb-20")    
-                        p(class="text-center") Si deseas contactar al vendedor
-                        a(href="/auth/registro", class="text-indigo-600 ") Debes crear una cuenta
-                else 
-                    div()
+                    if !esvendedor
+                        h3(class="text-2xl text-center my-10 font-extrabold text-gray-900")
+                        if enviado 
+                            p(class="p-2 text-center bg-green-100 text-green-600 uppercase font-bold") Mensaje enviado correctamente
+                        else if usuario
+
+                            if errores 
+                                div(class="max-w-md mx-auto my-10")
+                                    each error in errores 
+                                        p(class="bg-red-600 text-white uppercase text-xs text-center p-2 mb-1 font-bold")= error.msg      
+
+                            form( method="POST")
+                                input(type="hidden" name="_csrf" value= csrfToken)
+                                dvi(class="space-y-5")
+                                label(for="mensaje") Mensaje 
+                                textarea(id="menssaje" name="mensaje" class="p-2 w-full py-2 border border-gray-300 rounded-lg sahdow placeholder-gray-400", placeholder="Coloca tu mensaje aquí") 
+
+                                input(type="submit", value="Enviar Menssaje" class="bg-indigo-600 text-white font-bold uppercase text-sm w-full p-2 cursor-pointer")
+
+                        else 
+                            div(class="flex flex-col items-center justify-center gap-2 pb-20")    
+                                p(class="text-center") Si deseas contactar al vendedor
+                                a(href="/auth/registro", class="text-indigo-600 ") Debes crear una cuenta
 
                         
 block scripts
