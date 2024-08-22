@@ -1,8 +1,8 @@
 
 import { unlink } from "node:fs/promises";
-import {Precio, Categoria, Propiedad, Mensaje } from "../models/index.js";
+import {Precio, Categoria, Propiedad, Mensaje, Usuario } from "../models/index.js";
 import { validationResult } from "express-validator";
-import { esVendedor } from "../helpers/index.js";
+import { esVendedor, formatearFecha } from "../helpers/index.js";
 
 
 
@@ -323,6 +323,31 @@ const eliminar = async (req,res)=>{
 
 }
 
+//! Modifica el estado de la pripiedad
+const cambiarEstado = async (req, res) => {
+  const { id } = req.params;
+  //! Validar que la propiedad exista
+  const propiedad = await Propiedad.findByPk(id);
+  if(!propiedad){
+    console.log('Salio ! Validar que la propiedad exista');
+    return res.redirect('/mis-propiedades');
+  }
+
+  //! Validar que la propiedad pertenece a quien visita esta página
+  if(propiedad.usuarioId !== req.usuario.id){
+    console.log('! Validar que la propiedad pertenece a quien visita esta página');
+    return res.redirect('/mis-propiedades');
+  }
+
+  //! Actuaizar la propiedad
+  propiedad.publicado = !propiedad.publicado;
+  await propiedad.save()
+  res.json({
+    resultado: 'ok'
+  })
+
+}
+
 //! Area publica
 const mostrarPropiedad = async (req,res) =>{
 
@@ -409,10 +434,46 @@ const enviarMensaje = async(req, res) =>{
     enviado: true
   });
 }
-//! Leer mensajes recibidos
 
-const verMensajes = (req, res) =>{
-  res.send('Mensajes aqui')
+//! Leer mensajes recibidos
+const verMensajes = async(req, res) =>{
+
+  const { id } = req.params;
+  //! Validar que la propiedad exista
+  const propiedad = await Propiedad.findByPk(id, {
+    include:[
+      {
+        model: Mensaje, as: 'mensajes',
+          include: [
+            {
+              model: Usuario.scope('eliminarPassword'), as: 'usuario'
+            }
+          ]
+      },
+    ]
+  });
+  if(!propiedad){
+    console.log('Salio ! Validar que la propiedad exista');
+    return res.redirect('/mis-propiedades');
+  }
+
+  //! Validar si la propiedad no este publicada
+  if(!propiedad.publicado){
+    console.log('! Validar que la propiedad no este publicada');
+    return res.redirect('/mis-propiedades');
+  }
+
+  //! Validar que la propiedad pertenece a quien visita esta página
+  if(propiedad.usuarioId !== req.usuario.id){
+    console.log('! Validar que la propiedad pertenece a quien visita esta página');
+    return res.redirect('/mis-propiedades');
+  }
+
+  res.render('propiedades/mensajes', {
+    pagina: 'Mensajes',
+    mensajes: propiedad.mensajes,
+    formatearFecha
+  })
 }
 
 
@@ -425,6 +486,7 @@ export {
   editar,
   guardarCambios,
   eliminar,
+  cambiarEstado,
   mostrarPropiedad,
   enviarMensaje,
   verMensajes

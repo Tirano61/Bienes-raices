@@ -2,7 +2,7 @@
 
 
 import express from 'express';
-import { admin, crear, guardar, agregarImagen, alamcenarImagen, editar, guardarCambios, eliminar, mostrarPropiedad, enviarMensaje, verMensajes } from "../controllers/propiedadesController.js";
+import { admin, crear, guardar, agregarImagen, alamcenarImagen, editar, guardarCambios, eliminar, cambiarEstado, mostrarPropiedad, enviarMensaje, verMensajes } from "../controllers/propiedadesController.js";
 import { body } from "express-validator";
 import protegerRuta from "../middleware/protegerRuta.js";
 import upload from "../middleware/subirImagen.js";
@@ -44,6 +44,8 @@ router.post('/propiedades/editar/:id',protegerRuta,
 );
 
 router.post('/propiedades/eliminar/:id', protegerRuta, eliminar);
+//! Cambiar estado de la prpiedad
+router.put('/propiedades/:id', protegerRuta, cambiarEstado);
 
 //! Area publica todos los usuarios pueden entrar sin autenticarse
 router.get('/propiedades/:id', identificarUsuario, mostrarPropiedad);
